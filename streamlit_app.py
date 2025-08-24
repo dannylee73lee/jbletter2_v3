@@ -753,759 +753,760 @@ def generate_llm_lesson(openai_api_key, selected_week):
         </div>
         """
 
-def create_newsletter_html(content, issue_number, date, highlight_settings, git_section=""):
-    """웹툰 스타일 뉴스레터 HTML 템플릿 생성 함수"""
-    
-    # 하이라이트 설정 기본값
-    default_highlight = {
-        "title": "시선이 바뀌면 세상이 달라집니다",
-        "subtitle": "어제까지 당연하다고 생각했던 것들이 오늘은 왜 이렇게 이상해 보일까요? 🤔",
-        "description": "답은 간단합니다.\n시선이 바뀌었기 때문입니다. 🔍",
-        "link_text": "AT/DT 추진방향 →",
-        "link_url": "#"
-    }
-    
-    # 사용자 정의 하이라이트 설정 또는 기본값 사용
-    highlight = {**default_highlight, **highlight_settings}
-    
-    # 웹툰 스타일 CSS
-    css_styles = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-        
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-        
-        /* 웹툰 스타일 헤더 */
-        .header {
-            background: linear-gradient(45deg, #2d3436, #636e72);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 3px solid #74b9ff;
-        }
-        
-        .close-btn {
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.8;
-        }
-        
-        .header-title {
-            font-size: 20px;
-            font-weight: 700;
-            text-align: center;
-            flex: 1;
-            letter-spacing: 2px;
-        }
-        
-        .logo {
-            font-size: 14px;
-            color: #74b9ff;
-            font-weight: 700;
-            background: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-        }
-        
-        /* 탭 섹션 */
-        .tab-section {
-            background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            padding: 20px 30px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .tab-date {
-            background: #7b68ee;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .tab-hashtags {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-        
-        .newsletter-intro {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            color: white;
-            padding: 20px 30px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        /* 메인 히어로 섹션 */
-        .hero-section {
-            background: #ffd700;
-            padding: 60px 50px;
-            position: relative;
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .hero-content {
-            flex: 1;
-            z-index: 2;
-        }
-        
-        .hero-title {
-            font-size: 42px;
-            font-weight: 900;
-            color: #2d3436;
-            line-height: 1.2;
-            margin-bottom: 30px;
-            border-bottom: 4px solid #2d3436;
-            padding-bottom: 15px;
-            display: inline-block;
-        }
-        
-        .hero-character {
-            position: absolute;
-            right: 50px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 180px;
-            height: 180px;
-            z-index: 1;
-        }
-        
-        .hero-dialogue {
-            background: rgba(255,255,255,0.9);
-            padding: 25px;
-            border-radius: 20px;
-            margin: 20px 0;
-            font-size: 16px;
-            position: relative;
-            border-left: 5px solid #ff6b6b;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        
-        .hero-dialogue::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 30px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 10px solid rgba(255,255,255,0.9);
-        }
-        
-        .hero-conclusion {
-            font-size: 24px;
-            font-weight: 800;
-            color: #2d3436;
-            margin-top: 30px;
-            text-align: center;
-            background: rgba(255,255,255,0.8);
-            padding: 20px;
-            border-radius: 15px;
-        }
-        
-        .hero-link {
-            display: inline-block;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 700;
-            margin-top: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .hero-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
-        }
-        
-        /* 콘텐츠 섹션들 */
-        .content-section {
-            padding: 40px 50px;
-            position: relative;
-            border-bottom: 5px solid #f0f0f0;
-        }
-        
-        .section-global {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .section-domestic {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        
-        .section-tips {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .section-case {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: #2d3436;
-        }
-        
-        .section-title {
-            font-size: 32px;
-            font-weight: 900;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 3px solid rgba(255,255,255,0.3);
-            padding-bottom: 15px;
-        }
-        
-        .section-case .section-title {
-            border-bottom: 3px solid rgba(45,52,54,0.3);
-        }
-        
-        .section-icon {
-            font-size: 36px;
-        }
-        
-        /* 뉴스 아이템 */
-        .news-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-top: 20px;
-        }
-        
-        .news-item {
-            background: rgba(255,255,255,0.95);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease;
-            position: relative;
-        }
-        
-        .news-item:hover {
-            transform: translateY(-5px);
-        }
-        
-        .section-global .news-item,
-        .section-domestic .news-item,
-        .section-tips .news-item {
-            color: #2d3436;
-        }
-        
-        .news-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 15px;
-            color: #2d3436;
-            line-height: 1.3;
-        }
-        
-        .news-content {
-            font-size: 14px;
-            line-height: 1.7;
-            color: #636e72;
-            margin-bottom: 15px;
-        }
-        
-        .news-source {
-            font-size: 12px;
-            color: #74b9ff;
-            font-weight: 600;
-            background: #f8f9fa;
-            padding: 5px 10px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-        
-        /* 팁 섹션 특별 스타일 - 기존 구성 완전히 유지 */
-        .tips-container {
-            background: rgba(255,255,255,0.95);
-            padding: 35px;
-            border-radius: 25px;
-            color: #2d3436;
-            margin-top: 20px;
-        }
-        
-        .aidt-tips {
-            font-size: 14px;
-        }
-        
-        .aidt-tips .tip-title {
-            background: linear-gradient(45deg, #ffecd2, #fcb69f);
-            color: #2d3436;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 20px;
-            text-align: center;
-        }
-        
-        .aidt-tips .prompt-examples-title {
-            background: linear-gradient(45deg, #fd79a8, #e84393);
-            color: white;
-            padding: 15px 20px;
-            margin: 25px 0 20px 0;
-            border-radius: 15px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-        
-        .aidt-tips .prompt-template {
-            background: white;
-            margin-bottom: 25px;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border-left: 5px solid #74b9ff;
-        }
-        
-        .aidt-tips .template-title {
-            color: #2d3436;
-            font-weight: 800;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        .aidt-tips .template-content {
-            margin-left: 0;
-        }
-        
-        .aidt-tips .example-label, 
-        .aidt-tips .prompt-label {
-            font-weight: 700;
-            margin-top: 15px;
-            color: #6c5ce7;
-            font-size: 14px;
-        }
-        
-        .aidt-tips .example-content, 
-        .aidt-tips .prompt-content {
-            background: #f8f9fa;
-            padding: 18px;
-            border-radius: 12px;
-            margin: 10px 0;
-            line-height: 1.7;
-            border-left: 4px solid #74b9ff;
-            color: #2d3436;
-        }
-        
-        .aidt-tips .tip-footer {
-            margin-top: 25px;
-            font-style: italic;
-            color: #636e72;
-            text-align: center;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 15px;
-        }
-        
-        .aidt-tips p {
-            margin: 15px 0;
-            line-height: 1.7;
-        }
-        
-        /* 말풍선 스타일 */
-        .speech-bubble {
-            background: rgba(255,255,255,0.95);
-            padding: 25px;
-            border-radius: 25px;
-            position: relative;
-            margin: 20px 0;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            color: #2d3436;
-        }
-        
-        .speech-bubble::before {
-            content: '';
-            position: absolute;
-            top: -12px;
-            left: 40px;
-            width: 0;
-            height: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-            border-bottom: 12px solid rgba(255,255,255,0.95);
-        }
-        
-        /* AI 활용사례 특별 레이아웃 */
-        .case-item {
-            background: rgba(255,255,255,0.95);
-            padding: 35px;
-            border-radius: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            margin-top: 20px;
-        }
-        
-        .case-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #2d3436;
-            margin-bottom: 20px;
-            text-align: center;
-            background: linear-gradient(45deg, #a8e6cf, #88d8a3);
-            padding: 15px;
-            border-radius: 15px;
-        }
-        
-        .case-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin: 25px 0;
-        }
-        
-        .stat-item {
-            text-align: center;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 15px;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: 900;
-            color: #00b894;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #636e72;
-            margin-top: 5px;
-        }
-        
-        /* Git 학습 섹션 */
-        .llm-challenge {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            border-radius: 25px;
-            padding: 35px;
-            border: none;
-            color: white;
-            margin-top: 20px;
-        }
-        
-        .git-challenge h3 {
-            color: #00b894;
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 800;
-        }
-        
-        .lesson-details h4 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2d3436;
-            margin: 20px 0 15px 0;
-        }
-        
-        .lesson-details p {
-            background: rgba(255,255,255,0.8);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            line-height: 1.6;
-        }
-        
-        /* 코드 예제 박스 */
-        .code-example-box {
-            background: #2d3436;
-            border-radius: 15px;
-            margin: 25px 0;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .code-example-title {
-            background: linear-gradient(45deg, #00b894, #00cec9);
-            color: white;
-            padding: 15px 25px;
-            font-weight: 700;
-            font-size: 16px;
-        }
-        
-        .code-example-content {
-            padding: 25px;
-            color: #a8e6cf;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-        
-        /* 푸터 */
-        .footer {
-            background: linear-gradient(45deg, #2d3436, #636e72);
-            color: white;
-            padding: 30px;
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .footer p {
-            margin: 8px 0;
-            opacity: 0.9;
-        }
-        
-        /* 애니메이션 */
-        @keyframes float {
-            0%, 100% { transform: translateY(-50%) translateX(0px); }
-            50% { transform: translateY(-50%) translateX(-10px); }
-        }
-        
-        .floating {
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        /* 반응형 */
-        @media (max-width: 900px) {
-            .container {
-                margin: 10px;
-                border-radius: 15px;
-            }
-            
-            .news-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .prompt-examples-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .case-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .hero-section {
-                padding: 40px 30px;
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .hero-character {
-                position: static;
-                transform: none;
-                margin-top: 20px;
-            }
-            
-            .content-section {
-                padding: 30px 25px;
-            }
-            
-            .section-title {
-                font-size: 24px;
-            }
-            
-            .hero-title {
-                font-size: 32px;
-            }
-        }
-    </style>
-    """
-    
-    # 캐릭터 SVG 생성
-    character_svg = """
-    <svg width="180" height="180" viewBox="0 0 180 180">
-        <!-- 몸체 -->
-        <ellipse cx="90" cy="120" rx="35" ry="45" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        
-        <!-- 머리 -->
-        <circle cx="90" cy="70" r="35" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        
-        <!-- 귀 -->
-        <ellipse cx="70" cy="55" rx="12" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        <ellipse cx="110" cy="55" rx="12" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        
-        <!-- 눈 -->
-        <circle cx="80" cy="65" r="4" fill="#333"/>
-        <circle cx="100" cy="65" r="4" fill="#333"/>
-        
-        <!-- 입 -->
-        <path d="M 78 78 Q 90 88 102 78" stroke="#333" stroke-width="3" fill="none"/>
-        
-        <!-- 망원경 -->
-        <rect x="110" y="55" width="30" height="8" fill="#4a90e2" stroke="#333" stroke-width="2" rx="4"/>
-        <circle cx="140" cy="59" r="6" fill="#333"/>
-        <circle cx="140" cy="59" r="4" fill="#74b9ff"/>
-        
-        <!-- 팔 -->
-        <ellipse cx="60" cy="105" rx="8" ry="20" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        <ellipse cx="120" cy="100" rx="8" ry="20" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        
-        <!-- 다리 -->
-        <ellipse cx="75" cy="155" rx="8" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
-        <ellipse cx="105" cy="155" rx="8" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
-    </svg>
-    """
-    
-    # HTML 구조 생성
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>중부Infra AT/DT Weekly - 제{issue_number}호</title>
-        {css_styles}
-    </head>
-    <body>
-        <div class="container">
-            <!-- 웹툰 스타일 헤더 -->
-            <div class="header">
-                <div class="close-btn">✕</div>
-                <div class="header-title">중부Infra AT/DT Weekly</div>
-                <div class="logo">중부Infra</div>
-            </div>
-            
-            <!-- 탭 섹션 -->
-            <div class="tab-section">
-                <div class="tab-date">{date} ✨ 제{issue_number}호</div>
-                <div class="tab-hashtags">#AI혁신 #디지털트랜스포메이션 #스마트워크</div>
-            </div>
-            
-            <!-- 뉴스레터 소개 -->
-            <div class="newsletter-intro">
-                <p>📢 중부Infra AT/DT 뉴스레터는 모두가 AI발전 속도에 뒤쳐지지 않고 업무에 적용할 수 있도록 가장 흥미로운 AI 활용법을 전합니다.</p>
-            </div>
-            
-            <!-- 메인 히어로 섹션 -->
-            <div class="hero-section">
-                <div class="hero-content">
-                    <div class="hero-title">{highlight['title'].replace(' ', '<br>')}</div>
-                    
-                    <div class="hero-dialogue">
-                        "{highlight['subtitle']}"
-                    </div>
-                    
-                    <p style="font-size: 18px; color: #2d3436; margin: 20px 0;">답은 간단합니다.</p>
-                    
-                    <div class="hero-conclusion">{highlight['description'].replace(chr(10), '<br>')}</div>
-                    
-                    <a href="{highlight['link_url']}" class="hero-link">{highlight['link_text']}</a>
-                </div>
-                
-                <!-- 캐릭터 일러스트 -->
-                <div class="hero-character floating">
-                    {character_svg}
-                </div>
-            </div>
-    """
-    
-    # 섹션 추가 함수
-    def add_webtoon_section(title, section_key, icon, section_class=""):
-        if section_key not in content:
-            return ""
-            
-        section_content = content[section_key]
-        
-        if section_key == "aidt_tips":
-            # AI 팁 섹션 - 기존 구성 유지하되 웹툰 스타일 적용
-            return f"""
-            <div class="content-section {section_class}">
-                <div class="section-title">
-                    <span class="section-icon">{icon}</span>
-                    {title}
-                </div>
-                
-                <div class="tips-container aidt-tips">
-                    {section_content}
-                </div>
-            </div>
-            """
-        elif section_key in ["naver_news", "naver_trends"]:
-            # 말풍선 스타일 국내 뉴스
-            return f"""
-            <div class="content-section {section_class}">
-                <div class="section-title">
-                    <span class="section-icon">{icon}</span>
-                    {title}
-                </div>
-                
-                <div class="speech-bubble">
-                    {section_content}
-                </div>
-            </div>
-            """
-        elif section_key == "ai_use_case":
-            # AI 활용사례 특별 처리
-            return f"""
-            <div class="content-section {section_class}">
-                <div class="section-title">
-                    <span class="section-icon">{icon}</span>
-                    {title}
-                </div>
-                
-                <div class="case-item">
-                    {section_content}
-                </div>
-            </div>
-            """
-        else:
-            # 일반 뉴스 섹션 (2열 그리드)
-            return f"""
-            <div class="content-section {section_class}">
-                <div class="section-title">
-                    <span class="section-icon">{icon}</span>
-                    {title}
-                </div>
-                
-                <div class="news-container">
-                    {section_content}
-                </div>
-            </div>
-            """
-    
-    # 각 섹션 추가
-    html += add_webtoon_section("글로벌 AI 뉴스", "main_news", "🌍", "section-global")
-    html += add_webtoon_section("국내 AI 뉴스", "naver_news", "🇰🇷", "section-domestic")
-    html += add_webtoon_section("국내 AI 트렌드", "naver_trends", "📈", "section-domestic")
-    html += add_webtoon_section("이번 주 AT/DT 팁", "aidt_tips", "💡", "section-tips")
-    html += add_webtoon_section("AI 활용사례", "ai_use_case", "🚀", "section-case")
-    
-    # Git 학습 섹션 추가 (있는 경우)
-    if git_section:
-        html += git_section
-    
-    # 푸터 및 닫는 태그
-    html += f"""
-            <!-- 푸터 -->
-            <div class="footer">
-                <p>🎨 © {datetime.now().year} 중부Infra All rights reserved. | 뉴스레터 구독에 감사드립니다.</p>
-                <p>💌 문의사항이나 제안이 있으시면 언제든지 연락해 주세요^^.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
-    return html
+def create_newsletter_html(content, issue_number, date, highlight_settings, llm_section=""):
+   """웹툰 스타일 뉴스레터 HTML 템플릿 생성 함수"""
+   
+   # 하이라이트 설정 기본값
+   default_highlight = {
+       "title": "시선이 바뀌면 세상이 달라집니다",
+       "subtitle": "어제까지 당연하다고 생각했던 것들이 오늘은 왜 이렇게 이상해 보일까요? 🤔",
+       "description": "답은 간단합니다.\n시선이 바뀌었기 때문입니다. 🔍",
+       "link_text": "AT/DT 추진방향 →",
+       "link_url": "#"
+   }
+   
+   # 사용자 정의 하이라이트 설정 또는 기본값 사용
+   highlight = {**default_highlight, **highlight_settings}
+   
+   # 웹툰 스타일 CSS
+   css_styles = """
+   <style>
+       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+       
+       body {
+           font-family: 'Noto Sans KR', sans-serif;
+           margin: 0;
+           padding: 0;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           line-height: 1.6;
+       }
+       
+       .container {
+           max-width: 800px;
+           margin: 20px auto;
+           background: white;
+           border-radius: 20px;
+           overflow: hidden;
+           box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+       }
+       
+       /* 웹툰 스타일 헤더 */
+       .header {
+           background: linear-gradient(45deg, #2d3436, #636e72);
+           color: white;
+           padding: 20px 30px;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           border-bottom: 3px solid #74b9ff;
+       }
+       
+       .close-btn {
+           font-size: 20px;
+           cursor: pointer;
+           opacity: 0.8;
+       }
+       
+       .header-title {
+           font-size: 20px;
+           font-weight: 700;
+           text-align: center;
+           flex: 1;
+           letter-spacing: 2px;
+       }
+       
+       .logo {
+           font-size: 14px;
+           color: #74b9ff;
+           font-weight: 700;
+           background: white;
+           padding: 5px 10px;
+           border-radius: 15px;
+       }
+       
+       /* 탭 섹션 */
+       .tab-section {
+           background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+           padding: 20px 30px;
+           color: white;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
+       
+       .tab-date {
+           background: #7b68ee;
+           color: white;
+           padding: 10px 20px;
+           border-radius: 20px;
+           font-size: 14px;
+           font-weight: 600;
+       }
+       
+       .tab-hashtags {
+           font-size: 14px;
+           opacity: 0.9;
+           font-weight: 500;
+       }
+       
+       .newsletter-intro {
+           background: linear-gradient(135deg, #74b9ff, #0984e3);
+           color: white;
+           padding: 20px 30px;
+           text-align: center;
+           font-size: 14px;
+           font-weight: 500;
+       }
+       
+       /* 메인 히어로 섹션 */
+       .hero-section {
+           background: #ffd700;
+           padding: 60px 50px;
+           position: relative;
+           min-height: 300px;
+           display: flex;
+           align-items: center;
+       }
+       
+       .hero-content {
+           flex: 1;
+           z-index: 2;
+       }
+       
+       .hero-title {
+           font-size: 42px;
+           font-weight: 900;
+           color: #2d3436;
+           line-height: 1.2;
+           margin-bottom: 30px;
+           border-bottom: 4px solid #2d3436;
+           padding-bottom: 15px;
+           display: inline-block;
+       }
+       
+       .hero-character {
+           position: absolute;
+           right: 50px;
+           top: 50%;
+           transform: translateY(-50%);
+           width: 180px;
+           height: 180px;
+           z-index: 1;
+       }
+       
+       .hero-dialogue {
+           background: rgba(255,255,255,0.9);
+           padding: 25px;
+           border-radius: 20px;
+           margin: 20px 0;
+           font-size: 16px;
+           position: relative;
+           border-left: 5px solid #ff6b6b;
+           box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+       }
+       
+       .hero-dialogue::before {
+           content: '';
+           position: absolute;
+           top: -10px;
+           left: 30px;
+           width: 0;
+           height: 0;
+           border-left: 10px solid transparent;
+           border-right: 10px solid transparent;
+           border-bottom: 10px solid rgba(255,255,255,0.9);
+       }
+       
+       .hero-conclusion {
+           font-size: 24px;
+           font-weight: 800;
+           color: #2d3436;
+           margin-top: 30px;
+           text-align: center;
+           background: rgba(255,255,255,0.8);
+           padding: 20px;
+           border-radius: 15px;
+       }
+       
+       .hero-link {
+           display: inline-block;
+           background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+           color: white;
+           padding: 15px 30px;
+           border-radius: 25px;
+           text-decoration: none;
+           font-weight: 700;
+           margin-top: 20px;
+           box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+           transition: all 0.3s ease;
+       }
+       
+       .hero-link:hover {
+           transform: translateY(-3px);
+           box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+       }
+       
+       /* 콘텐츠 섹션들 */
+       .content-section {
+           padding: 40px 50px;
+           position: relative;
+           border-bottom: 5px solid #f0f0f0;
+       }
+       
+       .section-global {
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           color: white;
+       }
+       
+       .section-domestic {
+           background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+           color: white;
+       }
+       
+       .section-tips {
+           background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+           color: white;
+       }
+       
+       .section-case {
+           background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+           color: #2d3436;
+       }
+       
+       .section-title {
+           font-size: 32px;
+           font-weight: 900;
+           margin-bottom: 30px;
+           display: flex;
+           align-items: center;
+           gap: 15px;
+           border-bottom: 3px solid rgba(255,255,255,0.3);
+           padding-bottom: 15px;
+       }
+       
+       .section-case .section-title {
+           border-bottom: 3px solid rgba(45,52,54,0.3);
+       }
+       
+       .section-icon {
+           font-size: 36px;
+       }
+       
+       /* 뉴스 아이템 */
+       .news-container {
+           display: grid;
+           grid-template-columns: 1fr 1fr;
+           gap: 25px;
+           margin-top: 20px;
+       }
+       
+       .news-item {
+           background: rgba(255,255,255,0.95);
+           padding: 25px;
+           border-radius: 20px;
+           box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+           transition: transform 0.3s ease;
+           position: relative;
+       }
+       
+       .news-item:hover {
+           transform: translateY(-5px);
+       }
+       
+       .section-global .news-item,
+       .section-domestic .news-item,
+       .section-tips .news-item {
+           color: #2d3436;
+       }
+       
+       .news-title {
+           font-size: 18px;
+           font-weight: 800;
+           margin-bottom: 15px;
+           color: #2d3436;
+           line-height: 1.3;
+       }
+       
+       .news-content {
+           font-size: 14px;
+           line-height: 1.7;
+           color: #636e72;
+           margin-bottom: 15px;
+       }
+       
+       .news-source {
+           font-size: 12px;
+           color: #74b9ff;
+           font-weight: 600;
+           background: #f8f9fa;
+           padding: 5px 10px;
+           border-radius: 10px;
+           display: inline-block;
+       }
+       
+       /* 팁 섹션 특별 스타일 - 기존 구성 완전히 유지 */
+       .tips-container {
+           background: rgba(255,255,255,0.95);
+           padding: 35px;
+           border-radius: 25px;
+           color: #2d3436;
+           margin-top: 20px;
+       }
+       
+       .aidt-tips {
+           font-size: 14px;
+       }
+       
+       .aidt-tips .tip-title {
+           background: linear-gradient(45deg, #ffecd2, #fcb69f);
+           color: #2d3436;
+           padding: 20px;
+           margin-bottom: 20px;
+           border-radius: 20px;
+           font-weight: 800;
+           font-size: 20px;
+           text-align: center;
+       }
+       
+       .aidt-tips .prompt-examples-title {
+           background: linear-gradient(45deg, #fd79a8, #e84393);
+           color: white;
+           padding: 15px 20px;
+           margin: 25px 0 20px 0;
+           border-radius: 15px;
+           font-weight: 700;
+           font-size: 18px;
+       }
+       
+       .aidt-tips .prompt-template {
+           background: white;
+           margin-bottom: 25px;
+           border-radius: 20px;
+           padding: 25px;
+           box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+           border-left: 5px solid #74b9ff;
+       }
+       
+       .aidt-tips .template-title {
+           color: #2d3436;
+           font-weight: 800;
+           margin-bottom: 15px;
+           font-size: 16px;
+       }
+       
+       .aidt-tips .template-content {
+           margin-left: 0;
+       }
+       
+       .aidt-tips .example-label, 
+       .aidt-tips .prompt-label {
+           font-weight: 700;
+           margin-top: 15px;
+           color: #6c5ce7;
+           font-size: 14px;
+       }
+       
+       .aidt-tips .example-content, 
+       .aidt-tips .prompt-content {
+           background: #f8f9fa;
+           padding: 18px;
+           border-radius: 12px;
+           margin: 10px 0;
+           line-height: 1.7;
+           border-left: 4px solid #74b9ff;
+           color: #2d3436;
+       }
+       
+       .aidt-tips .tip-footer {
+           margin-top: 25px;
+           font-style: italic;
+           color: #636e72;
+           text-align: center;
+           background: #f8f9fa;
+           padding: 15px;
+           border-radius: 15px;
+       }
+       
+       .aidt-tips p {
+           margin: 15px 0;
+           line-height: 1.7;
+       }
+       
+       /* 말풍선 스타일 */
+       .speech-bubble {
+           background: rgba(255,255,255,0.95);
+           padding: 25px;
+           border-radius: 25px;
+           position: relative;
+           margin: 20px 0;
+           box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+           color: #2d3436;
+       }
+       
+       .speech-bubble::before {
+           content: '';
+           position: absolute;
+           top: -12px;
+           left: 40px;
+           width: 0;
+           height: 0;
+           border-left: 12px solid transparent;
+           border-right: 12px solid transparent;
+           border-bottom: 12px solid rgba(255,255,255,0.95);
+       }
+       
+       /* AI 활용사례 특별 레이아웃 */
+       .case-item {
+           background: rgba(255,255,255,0.95);
+           padding: 35px;
+           border-radius: 25px;
+           box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+           margin-top: 20px;
+       }
+       
+       .case-title {
+           font-size: 24px;
+           font-weight: 800;
+           color: #2d3436;
+           margin-bottom: 20px;
+           text-align: center;
+           background: linear-gradient(45deg, #a8e6cf, #88d8a3);
+           padding: 15px;
+           border-radius: 15px;
+       }
+       
+       .case-stats {
+           display: grid;
+           grid-template-columns: repeat(3, 1fr);
+           gap: 20px;
+           margin: 25px 0;
+       }
+       
+       .stat-item {
+           text-align: center;
+           background: #f8f9fa;
+           padding: 15px;
+           border-radius: 15px;
+       }
+       
+       .stat-number {
+           font-size: 24px;
+           font-weight: 900;
+           color: #00b894;
+       }
+       
+       .stat-label {
+           font-size: 12px;
+           color: #636e72;
+           margin-top: 5px;
+       }
+       
+       /* LLM 학습 섹션 */
+       .llm-challenge {
+           background: linear-gradient(135deg, #74b9ff, #0984e3);
+           border-radius: 25px;
+           padding: 35px;
+           border: none;
+           color: white;
+           margin-top: 20px;
+       }
+       
+       .llm-challenge h3 {
+           color: white;
+           font-size: 24px;
+           margin-bottom: 20px;
+           text-align: center;
+           font-weight: 800;
+       }
+       
+       .llm-challenge .lesson-details h4 {
+           font-size: 20px;
+           font-weight: 700;
+           color: white;
+           margin: 20px 0 15px 0;
+       }
+       
+       .llm-challenge .lesson-details p {
+           background: rgba(255,255,255,0.9);
+           color: #2d3436;
+           padding: 15px;
+           border-radius: 10px;
+           margin: 10px 0;
+           line-height: 1.6;
+       }
+       
+       /* 코드 예제 박스 */
+       .code-example-box {
+           background: #2d3436;
+           border-radius: 15px;
+           margin: 25px 0;
+           overflow: hidden;
+           box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+       }
+       
+       .code-example-title {
+           background: linear-gradient(45deg, #00b894, #00cec9);
+           color: white;
+           padding: 15px 25px;
+           font-weight: 700;
+           font-size: 16px;
+       }
+       
+       .code-example-content {
+           padding: 25px;
+           color: #a8e6cf;
+           font-family: 'Courier New', monospace;
+           font-size: 14px;
+           line-height: 1.6;
+           white-space: pre-wrap;
+       }
+       
+       /* 푸터 */
+       .footer {
+           background: linear-gradient(45deg, #2d3436, #636e72);
+           color: white;
+           padding: 30px;
+           text-align: center;
+           font-size: 14px;
+       }
+       
+       .footer p {
+           margin: 8px 0;
+           opacity: 0.9;
+       }
+       
+       /* 애니메이션 */
+       @keyframes float {
+           0%, 100% { transform: translateY(-50%) translateX(0px); }
+           50% { transform: translateY(-50%) translateX(-10px); }
+       }
+       
+       .floating {
+           animation: float 4s ease-in-out infinite;
+       }
+       
+       /* 반응형 */
+       @media (max-width: 900px) {
+           .container {
+               margin: 10px;
+               border-radius: 15px;
+           }
+           
+           .news-container {
+               grid-template-columns: 1fr;
+           }
+           
+           .prompt-examples-grid {
+               grid-template-columns: 1fr;
+           }
+           
+           .case-stats {
+               grid-template-columns: 1fr;
+           }
+           
+           .hero-section {
+               padding: 40px 30px;
+               flex-direction: column;
+               text-align: center;
+           }
+           
+           .hero-character {
+               position: static;
+               transform: none;
+               margin-top: 20px;
+           }
+           
+           .content-section {
+               padding: 30px 25px;
+           }
+           
+           .section-title {
+               font-size: 24px;
+           }
+           
+           .hero-title {
+               font-size: 32px;
+           }
+       }
+   </style>
+   """
+   
+   # 캐릭터 SVG 생성
+   character_svg = """
+   <svg width="180" height="180" viewBox="0 0 180 180">
+       <!-- 몸체 -->
+       <ellipse cx="90" cy="120" rx="35" ry="45" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       
+       <!-- 머리 -->
+       <circle cx="90" cy="70" r="35" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       
+       <!-- 귀 -->
+       <ellipse cx="70" cy="55" rx="12" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       <ellipse cx="110" cy="55" rx="12" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       
+       <!-- 눈 -->
+       <circle cx="80" cy="65" r="4" fill="#333"/>
+       <circle cx="100" cy="65" r="4" fill="#333"/>
+       
+       <!-- 입 -->
+       <path d="M 78 78 Q 90 88 102 78" stroke="#333" stroke-width="3" fill="none"/>
+       
+       <!-- 망원경 -->
+       <rect x="110" y="55" width="30" height="8" fill="#4a90e2" stroke="#333" stroke-width="2" rx="4"/>
+       <circle cx="140" cy="59" r="6" fill="#333"/>
+       <circle cx="140" cy="59" r="4" fill="#74b9ff"/>
+       
+       <!-- 팔 -->
+       <ellipse cx="60" cy="105" rx="8" ry="20" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       <ellipse cx="120" cy="100" rx="8" ry="20" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       
+       <!-- 다리 -->
+       <ellipse cx="75" cy="155" rx="8" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
+       <ellipse cx="105" cy="155" rx="8" ry="18" fill="#ffb347" stroke="#333" stroke-width="3"/>
+   </svg>
+   """
+   
+   # HTML 구조 생성
+   html = f"""
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>중부Infra AT/DT Weekly - 제{issue_number}호</title>
+       {css_styles}
+   </head>
+   <body>
+       <div class="container">
+           <!-- 웹툰 스타일 헤더 -->
+           <div class="header">
+               <div class="close-btn">✕</div>
+               <div class="header-title">중부Infra AT/DT Weekly</div>
+               <div class="logo">중부Infra</div>
+           </div>
+           
+           <!-- 탭 섹션 -->
+           <div class="tab-section">
+               <div class="tab-date">{date} ✨ 제{issue_number}호</div>
+               <div class="tab-hashtags">#AI혁신 #디지털트랜스포메이션 #스마트워크</div>
+           </div>
+           
+           <!-- 뉴스레터 소개 -->
+           <div class="newsletter-intro">
+               <p>📢 중부Infra AT/DT 뉴스레터는 모두가 AI발전 속도에 뒤쳐지지 않고 업무에 적용할 수 있도록 가장 흥미로운 AI 활용법을 전합니다.</p>
+           </div>
+           
+           <!-- 메인 히어로 섹션 -->
+           <div class="hero-section">
+               <div class="hero-content">
+                   <div class="hero-title">{highlight['title'].replace(' ', '<br>')}</div>
+                   
+                   <div class="hero-dialogue">
+                       "{highlight['subtitle']}"
+                   </div>
+                   
+                   <p style="font-size: 18px; color: #2d3436; margin: 20px 0;">답은 간단합니다.</p>
+                   
+                   <div class="hero-conclusion">{highlight['description'].replace(chr(10), '<br>')}</div>
+                   
+                   <a href="{highlight['link_url']}" class="hero-link">{highlight['link_text']}</a>
+               </div>
+               
+               <!-- 캐릭터 일러스트 -->
+               <div class="hero-character floating">
+                   {character_svg}
+               </div>
+           </div>
+   """
+   
+   # 섹션 추가 함수
+   def add_webtoon_section(title, section_key, icon, section_class=""):
+       if section_key not in content:
+           return ""
+           
+       section_content = content[section_key]
+       
+       if section_key == "aidt_tips":
+           # AI 팁 섹션 - 기존 구성 유지하되 웹툰 스타일 적용
+           return f"""
+           <div class="content-section {section_class}">
+               <div class="section-title">
+                   <span class="section-icon">{icon}</span>
+                   {title}
+               </div>
+               
+               <div class="tips-container aidt-tips">
+                   {section_content}
+               </div>
+           </div>
+           """
+       elif section_key in ["naver_news", "naver_trends"]:
+           # 말풍선 스타일 국내 뉴스
+           return f"""
+           <div class="content-section {section_class}">
+               <div class="section-title">
+                   <span class="section-icon">{icon}</span>
+                   {title}
+               </div>
+               
+               <div class="speech-bubble">
+                   {section_content}
+               </div>
+           </div>
+           """
+       elif section_key == "ai_use_case":
+           # AI 활용사례 특별 처리
+           return f"""
+           <div class="content-section {section_class}">
+               <div class="section-title">
+                   <span class="section-icon">{icon}</span>
+                   {title}
+               </div>
+               
+               <div class="case-item">
+                   {section_content}
+               </div>
+           </div>
+           """
+       else:
+           # 일반 뉴스 섹션 (2열 그리드)
+           return f"""
+           <div class="content-section {section_class}">
+               <div class="section-title">
+                   <span class="section-icon">{icon}</span>
+                   {title}
+               </div>
+               
+               <div class="news-container">
+                   {section_content}
+               </div>
+           </div>
+           """
+   
+   # 각 섹션 추가
+   html += add_webtoon_section("글로벌 AI 뉴스", "main_news", "🌍", "section-global")
+   html += add_webtoon_section("국내 AI 뉴스", "naver_news", "🇰🇷", "section-domestic")
+   html += add_webtoon_section("국내 AI 트렌드", "naver_trends", "📈", "section-domestic")
+   html += add_webtoon_section("이번 주 AT/DT 팁", "aidt_tips", "💡", "section-tips")
+   html += add_webtoon_section("AI 활용사례", "ai_use_case", "🚀", "section-case")
+   
+   # LLM 학습 섹션 추가 (있는 경우)
+   if llm_section:
+       html += llm_section
+   
+   # 푸터 및 닫는 태그
+   html += f"""
+           <!-- 푸터 -->
+           <div class="footer">
+               <p>🎨 © {datetime.now().year} 중부Infra All rights reserved. | 뉴스레터 구독에 감사드립니다.</p>
+               <p>💌 문의사항이나 제안이 있으시면 언제든지 연락해 주세요^^.</p>
+           </div>
+       </div>
+   </body>
+   </html>
+   """
+   
+   return html
 
 def create_download_link(html_content, filename):
     """HTML 콘텐츠를 다운로드할 수 있는 링크를 생성합니다."""
@@ -1729,7 +1730,7 @@ def generate_newsletter(api_keys, settings, custom_content=None):
         issue_number,
         date,
         highlight_settings,
-        git_challenge_section
+        llm_challenge_section  # ← 변수명 수정
     )
    
     return html_content
@@ -1901,7 +1902,7 @@ def main():
                 # 결과 표시
                 filename = f"중부Infra_ATDT_Weekly-제{issue_number}호.html"
                 
-                st.success(f"✅ 뉴스레터가 성공적으로 생성되었습니다! ({selected_week} Git 학습과정 포함)")
+                st.success(f"✅ 뉴스레터가 성공적으로 생성되었습니다! ({selected_week} LLM 학습과정 포함)")
                 st.markdown(create_download_link(newsletter_html, filename), unsafe_allow_html=True)
                 
                 # 미리보기 표시
